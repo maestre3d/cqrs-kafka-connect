@@ -46,6 +46,29 @@ func (u *UserPostgres) Save(ctx context.Context, user aggregate.User) error {
 	return tx.Commit()
 }
 
+func (u *UserPostgres) Update(ctx context.Context, user aggregate.User) error {
+	u.mu.Lock()
+	defer u.mu.Unlock()
+
+	conn, err := u.db.Conn(ctx)
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	tx, err := conn.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	q := `UPDATE users SET username = $1, display_name = $2 WHERE user_id = $3`
+	if _, err = tx.ExecContext(ctx, q, user.ID, user.Username, user.DisplayName); err != nil {
+		_ = tx.Rollback()
+		return err
+	}
+	return tx.Commit()
+}
+
 func (u *UserPostgres) Find(ctx context.Context, userID string) (*aggregate.User, error) {
 	u.mu.RLock()
 	defer u.mu.RUnlock()
