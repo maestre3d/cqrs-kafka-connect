@@ -1,0 +1,284 @@
+{
+	"info": {
+		"_postman_id": "8def2b9a-4b47-49b4-82db-376c8d3fed9f",
+		"name": "Kafka Connect API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "PostgreSQL JDBC Source",
+			"item": [
+				{
+					"name": "Create PostgreSQL Source Connector",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"psql_neutrino_users\",\r\n    \"config\": {\r\n            \"connector.class\": \"io.confluent.connect.jdbc.JdbcSourceConnector\",\r\n            \"connection.url\": \"jdbc:postgresql://postgres:5432/neutrino_users\",\r\n            \"connection.user\": \"postgres\",\r\n            \"connection.password\": \"root\",\r\n            \"topic.prefix\": \"psql-\",\r\n            \"mode\":\"timestamp\",\r\n            \"poll.interval.ms\" : 5000,\r\n            \"timestamp.column.name\": \"update_time\",\r\n            \"validate.non.null\": false,\r\n            \"table.whitelist\": \"users\",\r\n            \"transforms\": \"ValueToKey\",\r\n            \"transforms.ValueToKey.type\":\"org.apache.kafka.connect.transforms.ValueToKey\",\r\n            \"transforms.ValueToKey.fields\":\"user_id\"\r\n        }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8083/connectors",
+							"host": [
+								"localhost"
+							],
+							"port": "8083",
+							"path": [
+								"connectors"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Elasticsearch Sink",
+			"item": [
+				{
+					"name": "Create Elasticsearch Sink Connector",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"elasticsearch_sink_users\",\r\n    \"config\": {\r\n            \"connector.class\": \"io.confluent.connect.elasticsearch.ElasticsearchSinkConnector\",\r\n            \"tasks.max\": \"1\",\r\n            \"topics\": \"psql-users\",\r\n            \"key.ignore\": \"false\",\r\n            \"connection.url\": \"http://elastic:9200\",\r\n            \"name\": \"elasticsearch_sink_users\",\r\n            \"type.name\": \"_doc\",\r\n            \"schema.ignore\": \"false\",\r\n            \"delete.enabled\": \"true\",\r\n            \"pk.mode\": \"record_key\"\r\n        }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8083/connectors",
+							"host": [
+								"localhost"
+							],
+							"port": "8083",
+							"path": [
+								"connectors"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Elasticsearch",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:9200/psql-users/_search",
+							"host": [
+								"localhost"
+							],
+							"port": "9200",
+							"path": [
+								"psql-users",
+								"_search"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Elasticsearch Sink Connector Debezium",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"elastic_neutrino_users\",\r\n    \"config\": {\r\n            \"connector.class\": \"io.confluent.connect.elasticsearch.ElasticsearchSinkConnector\",\r\n            \"tasks.max\": \"1\",\r\n            \"topics\": \"user.public.users\",\r\n            \"key.ignore\": \"false\",\r\n            \"connection.url\": \"http://elastic:9200\",\r\n            \"name\": \"elastic_neutrino_users\",\r\n            \"type.name\": \"_doc\",\r\n            \"schema.ignore\": \"false\",\r\n            \"delete.enabled\": \"true\",\r\n            \"pk.mode\": \"record_key\",\r\n            \"behavior.on.null.values\": \"delete\"\r\n        }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8083/connectors",
+							"host": [
+								"localhost"
+							],
+							"port": "8083",
+							"path": [
+								"connectors"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Elasticsearch Debezium",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:9200/user.public.users/_search",
+							"host": [
+								"localhost"
+							],
+							"port": "9200",
+							"path": [
+								"user.public.users",
+								"_search"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "PostgreSQL Debezium Source",
+			"item": [
+				{
+					"name": "Create PostgreSQL Source Connector",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"psql_neutrino_users\",\r\n    \"config\": {\r\n            \"connector.class\": \"io.debezium.connector.postgresql.PostgresConnector\",\r\n            \"tasks.max\": \"1\",\r\n            \"database.hostname\": \"postgres\", \r\n            \"database.port\": \"5432\", \r\n            \"database.user\": \"postgres\", \r\n            \"database.password\": \"root\", \r\n            \"database.dbname\" : \"neutrino_users\", \r\n            \"database.server.name\": \"user\",\r\n            \"table.include.list\": \"public.users\",\r\n            \"poll.interval.ms\" : 1000,\r\n            \"plugin.name\": \"pgoutput\",\r\n            \"transforms\": \"unwrap\",\r\n            \"transforms.unwrap.type\":\"io.debezium.transforms.ExtractNewRecordState\",\r\n            \"transforms.unwrap.drop.tombstones\": \"false\",\r\n            \"transforms.unwrap.delete.handling.mode\": \"drop\"\r\n        }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8083/connectors",
+							"host": [
+								"localhost"
+							],
+							"port": "8083",
+							"path": [
+								"connectors"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "List connectors",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8083/connectors",
+					"host": [
+						"localhost"
+					],
+					"port": "8083",
+					"path": [
+						"connectors"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Remove connector",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"jdbc_source_psql_01\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8083/connectors/psql_neutrino_users",
+					"host": [
+						"localhost"
+					],
+					"port": "8083",
+					"path": [
+						"connectors",
+						"psql_neutrino_users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get connector status",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8083/connectors/psql_neutrino_users/status",
+					"host": [
+						"localhost"
+					],
+					"port": "8083",
+					"path": [
+						"connectors",
+						"psql_neutrino_users",
+						"status"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get connector ",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8083/connectors/psql_neutrino_users",
+					"host": [
+						"localhost"
+					],
+					"port": "8083",
+					"path": [
+						"connectors",
+						"psql_neutrino_users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update connector",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"connector.class\": \"io.debezium.connector.postgresql.PostgresConnector\",\r\n    \"tasks.max\": \"1\",\r\n    \"database.hostname\": \"postgres\", \r\n    \"database.port\": \"5432\", \r\n    \"database.user\": \"postgres\", \r\n    \"database.password\": \"root\", \r\n    \"database.dbname\" : \"neutrino_users\", \r\n    \"database.server.name\": \"user\",\r\n    \"table.include.list\": \"public.users\",\r\n    \"poll.interval.ms\" : 1000,\r\n    \"plugin.name\": \"pgoutput\",\r\n    \"transforms\": \"unwrap\",\r\n    \"transforms.unwrap.type\":\"io.debezium.transforms.ExtractNewRecordState\",\r\n    \"transforms.unwrap.drop.tombstones\": \"false\",\r\n    \"transforms.unwrap.delete.handling.mode\": \"drop\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8083/connectors/psql_neutrino_users/config",
+					"host": [
+						"localhost"
+					],
+					"port": "8083",
+					"path": [
+						"connectors",
+						"psql_neutrino_users",
+						"config"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
