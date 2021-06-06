@@ -19,7 +19,11 @@ func main() {
 	}
 	writeRepo := persistence.NewUserPostgres(db)
 	appService := application.NewUser(writeRepo)
-	if err := appService.Create(ctx, "1", "aruiz", "Alonso Ruiz"); err != nil {
+	if err := appService.Create(ctx, "1", "br1", "Alfonso Arevalo"); err != nil {
+		panic(err)
+	}
+
+	if err := appService.Update(ctx, "1", "Bruno Arevalo"); err != nil {
 		panic(err)
 	}
 }

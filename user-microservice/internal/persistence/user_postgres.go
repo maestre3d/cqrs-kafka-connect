@@ -11,6 +11,7 @@ import (
 
 type UserPostgres struct {
 	db *sql.DB
+	tx *sql.Tx
 	mu sync.RWMutex
 }
 
@@ -23,50 +24,57 @@ func NewUserPostgres(db *sql.DB) *UserPostgres {
 
 var _ repository.User = &UserPostgres{}
 
+func (u *UserPostgres) Begin(ctx context.Context) error {
+	u.mu.Lock()
+	defer u.mu.Unlock()
+
+	var err error
+	u.tx, err = u.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (u *UserPostgres) Commit() error {
+	return u.tx.Commit()
+}
+
+func (u *UserPostgres) Rollback() error {
+	return u.tx.Rollback()
+}
+
 func (u *UserPostgres) Save(ctx context.Context, user aggregate.User) error {
 	u.mu.Lock()
 	defer u.mu.Unlock()
 
-	conn, err := u.db.Conn(ctx)
-	if err != nil {
-		return err
-	}
-	defer conn.Close()
-
-	tx, err := conn.BeginTx(ctx, nil)
-	if err != nil {
-		return err
-	}
-
 	q := `INSERT INTO users(user_id, username, display_name) VALUES ($1, $2, $3)`
-	if _, err = tx.ExecContext(ctx, q, user.ID, user.Username, user.DisplayName); err != nil {
-		_ = tx.Rollback()
+	stmt, err := u.tx.PrepareContext(ctx, q)
+	if err != nil {
 		return err
 	}
-	return tx.Commit()
+
+	if _, err := stmt.ExecContext(ctx, user.ID, user.Username, user.DisplayName); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (u *UserPostgres) Update(ctx context.Context, user aggregate.User) error {
 	u.mu.Lock()
 	defer u.mu.Unlock()
 
-	conn, err := u.db.Conn(ctx)
-	if err != nil {
-		return err
-	}
-	defer conn.Close()
-
-	tx, err := conn.BeginTx(ctx, nil)
-	if err != nil {
-		return err
-	}
-
 	q := `UPDATE users SET username = $1, display_name = $2 WHERE user_id = $3`
-	if _, err = tx.ExecContext(ctx, q, user.ID, user.Username, user.DisplayName); err != nil {
-		_ = tx.Rollback()
+	stmt, err := u.tx.PrepareContext(ctx, q)
+	if err != nil {
 		return err
 	}
-	return tx.Commit()
+
+	if _, err := stmt.ExecContext(ctx, user.Username, user.DisplayName, user.ID); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (u *UserPostgres) Find(ctx context.Context, userID string) (*aggregate.User, error) {
@@ -82,7 +90,9 @@ func (u *UserPostgres) Find(ctx context.Context, userID string) (*aggregate.User
 	q := `SELECT user_id, username, display_name FROM users WHERE user_id = $1`
 	user := new(aggregate.User)
 	err = conn.QueryRowContext(ctx, q, userID).Scan(&user.ID, &user.Username, &user.DisplayName)
-	if err != nil {
+	if err == sql.ErrNoRows {
+		return nil, nil
+	} else if err != nil {
 		return nil, err
 	}
 	return user, nil
