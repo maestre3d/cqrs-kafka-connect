@@ -3,6 +3,7 @@ services:
     postgres:
         image: postgres:alpine
         container_name: postgres
+        hostname: postgres
         ports: 
             - 6432:5432
         environment: 
@@ -13,6 +14,7 @@ services:
     elastic:
         image: docker.elastic.co/elasticsearch/elasticsearch:7.13.0
         container_name: elastic
+        hostname: elastic
         ulimits:
             memlock:
               soft: -1
@@ -121,12 +123,12 @@ services:
                 #
                 sleep infinity
 
-    ksqldb:
+    ksqldb-server:
         # *-----------------------------*
         # To connect to ksqlDB CLI
         #   docker exec --interactive --tty ksqldb ksql http://localhost:8088
         # *-----------------------------*
-        image: confluentinc/ksqldb-server:0.14.0
+        image: confluentinc/cp-ksqldb-server:latest
         hostname: ksqldb
         container_name: ksqldb
         depends_on:
@@ -135,6 +137,7 @@ services:
         ports:
             - 8088:8088
         environment:
+            KSQL_CONFIG_DIR: "/etc/ksql"
             KSQL_LISTENERS: http://0.0.0.0:8088
             KSQL_BOOTSTRAP_SERVERS: kafka:29092
             KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: "true"
@@ -144,6 +147,16 @@ services:
             KSQL_KSQL_CONNECT_URL: http://kafka-connect:8083
             KSQL_KSQL_SERVICE_ID: confluent_rmoff_01
             KSQL_KSQL_HIDDEN_TOPICS: '^_.*'
+
+    ksqldb-cli:
+        image: confluentinc/cp-ksqldb-cli:latest
+        container_name: ksqldb-cli
+        depends_on:
+            - kafka
+            - kafka-connect
+            - ksqldb-server
+        entrypoint: /bin/sh
+        tty: true
 
 volumes:
     data01:
