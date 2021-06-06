@@ -19,23 +19,18 @@ var (
 	ErrUserNotFound = errors.New("user not found")
 )
 
-type UserImpl struct {
+type user struct {
 	repo repository.User
 }
 
-var _ User = &UserImpl{}
+var _ User = &user{}
 
-func (u *UserImpl) Create(ctx context.Context, id, username, displayName string) error {
+func (u *user) Create(ctx context.Context, id, username, displayName string) error {
 	user := aggregate.NewUser(id, username, displayName)
-	if err := u.repo.Save(ctx, *user); err != nil {
-		return err
-	}
-
-	user.DisplayName = "primateArevalo"
-	return u.repo.Update(ctx, *user)
+	return u.repo.Save(ctx, *user)
 }
 
-func (u *UserImpl) Update(ctx context.Context, id, displayName string) error {
+func (u *user) Update(ctx context.Context, id, displayName string) error {
 	user, err := u.repo.Find(ctx, id)
 	if err != nil {
 		return err
@@ -46,10 +41,10 @@ func (u *UserImpl) Update(ctx context.Context, id, displayName string) error {
 	return u.repo.Update(ctx, *user)
 }
 
-func (u *UserImpl) Search(ctx context.Context, query string) ([]*aggregate.User, error) {
+func (u *user) Search(ctx context.Context, query string) ([]*aggregate.User, error) {
 	return u.repo.Search(ctx, query)
 }
 
-func (u *UserImpl) GetById(ctx context.Context, userID string) (*aggregate.User, error) {
+func (u *user) GetById(ctx context.Context, userID string) (*aggregate.User, error) {
 	return u.repo.Find(ctx, userID)
 }

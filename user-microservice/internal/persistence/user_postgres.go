@@ -50,7 +50,7 @@ func (u *UserPostgres) Save(ctx context.Context, user aggregate.User) error {
 	defer u.mu.Unlock()
 
 	q := `INSERT INTO users(user_id, username, display_name) VALUES ($1, $2, $3)`
-	stmt, err := u.tx.PrepareContext(ctx, q)
+	stmt, err := u.tx.PrepareContext(ctx, q) // avoid SQL injections
 	if err != nil {
 		return err
 	}
