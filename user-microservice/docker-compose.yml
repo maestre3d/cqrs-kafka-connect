@@ -29,8 +29,6 @@ services:
             # - cluster.initial_master_nodes=elastic
             - bootstrap.memory_lock=true
             - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-        volumes:
-            - data01:/usr/share/elasticsearch/data
         ports:
             - 9200:9200
 
@@ -161,7 +159,3 @@ services:
             - ksqldb-server
         entrypoint: /bin/sh
         tty: true
-
-volumes:
-    data01:
-        driver: local
