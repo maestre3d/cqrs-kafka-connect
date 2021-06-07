@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/maestre3d/cqrs-kafka-connect/user-microservice/internal/aggregate"
+	"github.com/maestre3d/cqrs-kafka-connect/user-microservice/internal/domain"
 	"github.com/maestre3d/cqrs-kafka-connect/user-microservice/internal/repository"
 )
 
@@ -98,6 +99,6 @@ func (u *UserPostgres) Find(ctx context.Context, userID string) (*aggregate.User
 	return user, nil
 }
 
-func (u *UserPostgres) Search(ctx context.Context, query string) ([]*aggregate.User, error) {
+func (u *UserPostgres) Search(ctx context.Context, criteria domain.Criteria) ([]*aggregate.User, error) {
 	return nil, nil // this will be implemented using full-text search through ElasticSearch
 }

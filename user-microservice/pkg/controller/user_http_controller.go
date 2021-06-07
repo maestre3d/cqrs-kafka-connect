@@ -5,9 +5,10 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	nanoid "github.com/matoous/go-nanoid/v2"
+
 	"github.com/maestre3d/cqrs-kafka-connect/user-microservice/internal/application"
 	"github.com/maestre3d/cqrs-kafka-connect/user-microservice/pkg/schema"
-	nanoid "github.com/matoous/go-nanoid/v2"
 )
 
 type UserHTTP struct {
@@ -80,8 +81,8 @@ func (u *UserHTTP) get(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u *UserHTTP) list(w http.ResponseWriter, r *http.Request) {
-	query := r.URL.Query().Get("q")
-	users, err := u.readOnlyService.Search(r.Context(), query)
+	criteria := schema.NewCriteriaFromHTTP(r)
+	users, err := u.readOnlyService.Search(r.Context(), criteria)
 	if err != nil {
 		schema.RespondErrorHTTP(w, err)
 		return

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/maestre3d/cqrs-kafka-connect/user-microservice/internal/aggregate"
+	"github.com/maestre3d/cqrs-kafka-connect/user-microservice/internal/domain"
 	"github.com/maestre3d/cqrs-kafka-connect/user-microservice/internal/repository"
 )
 
@@ -49,8 +50,8 @@ func (u *userRepositoryTransaction) Update(ctx context.Context, id, displayName 
 	return
 }
 
-func (u *userRepositoryTransaction) Search(ctx context.Context, query string) ([]*aggregate.User, error) {
-	return u.next.Search(ctx, query)
+func (u *userRepositoryTransaction) Search(ctx context.Context, critera domain.Criteria) ([]*aggregate.User, error) {
+	return u.next.Search(ctx, critera)
 }
 
 func (u *userRepositoryTransaction) GetById(ctx context.Context, userID string) (*aggregate.User, error) {

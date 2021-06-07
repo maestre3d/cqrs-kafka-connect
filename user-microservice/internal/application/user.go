@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/maestre3d/cqrs-kafka-connect/user-microservice/internal/aggregate"
+	"github.com/maestre3d/cqrs-kafka-connect/user-microservice/internal/domain"
 	"github.com/maestre3d/cqrs-kafka-connect/user-microservice/internal/repository"
 )
 
@@ -19,8 +20,8 @@ type UserWriteOnly interface {
 }
 
 type UserReadOnly interface {
-	Search(ctx context.Context, query string) ([]*aggregate.User, error)
-	GetById(ctx context.Context, userID string) (*aggregate.User, error)
+	Search(context.Context, domain.Criteria) ([]*aggregate.User, error)
+	GetById(context.Context, string) (*aggregate.User, error)
 }
 
 var (
@@ -49,8 +50,8 @@ func (u *user) Update(ctx context.Context, id, displayName string) error {
 	return u.repo.Update(ctx, *user)
 }
 
-func (u *user) Search(ctx context.Context, query string) ([]*aggregate.User, error) {
-	return u.repo.Search(ctx, query)
+func (u *user) Search(ctx context.Context, criteria domain.Criteria) ([]*aggregate.User, error) {
+	return u.repo.Search(ctx, criteria)
 }
 
 func (u *user) GetById(ctx context.Context, userID string) (*aggregate.User, error) {
