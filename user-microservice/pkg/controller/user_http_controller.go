@@ -8,6 +8,7 @@ import (
 	nanoid "github.com/matoous/go-nanoid/v2"
 
 	"github.com/maestre3d/cqrs-kafka-connect/user-microservice/internal/application"
+	"github.com/maestre3d/cqrs-kafka-connect/user-microservice/internal/query"
 	"github.com/maestre3d/cqrs-kafka-connect/user-microservice/pkg/schema"
 )
 
@@ -82,11 +83,15 @@ func (u *UserHTTP) get(w http.ResponseWriter, r *http.Request) {
 
 func (u *UserHTTP) list(w http.ResponseWriter, r *http.Request) {
 	criteria := schema.NewCriteriaFromHTTP(r)
-	users, err := u.readOnlyService.Search(r.Context(), criteria)
+	queryDTO := query.SearchUsers{
+		Criteria: criteria,
+	}
+	handler := query.NewSearchUsersHandler(u.readOnlyService)
+	res, err := handler.Handle(r.Context(), queryDTO)
 	if err != nil {
 		schema.RespondErrorHTTP(w, err)
 		return
 	}
 	w.Header().Add("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(users)
+	json.NewEncoder(w).Encode(res)
 }

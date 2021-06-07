@@ -20,7 +20,7 @@ type UserWriteOnly interface {
 }
 
 type UserReadOnly interface {
-	Search(context.Context, domain.Criteria) ([]*aggregate.User, error)
+	Search(context.Context, domain.Criteria) ([]*aggregate.User, string, error)
 	GetById(context.Context, string) (*aggregate.User, error)
 }
 
@@ -50,7 +50,7 @@ func (u *user) Update(ctx context.Context, id, displayName string) error {
 	return u.repo.Update(ctx, *user)
 }
 
-func (u *user) Search(ctx context.Context, criteria domain.Criteria) ([]*aggregate.User, error) {
+func (u *user) Search(ctx context.Context, criteria domain.Criteria) ([]*aggregate.User, string, error) {
 	return u.repo.Search(ctx, criteria)
 }
 

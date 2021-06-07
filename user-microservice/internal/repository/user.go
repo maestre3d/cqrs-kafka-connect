@@ -12,5 +12,5 @@ type User interface {
 	Save(context.Context, aggregate.User) error
 	Update(context.Context, aggregate.User) error
 	Find(context.Context, string) (*aggregate.User, error)
-	Search(context.Context, domain.Criteria) ([]*aggregate.User, error)
+	Search(context.Context, domain.Criteria) ([]*aggregate.User, string, error)
 }

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"strconv"
 	"sync"
 
 	"github.com/elastic/go-elasticsearch/v8"
@@ -82,17 +83,17 @@ func (u *UserElastic) UnmarshalElastic(source map[string]interface{}) (*aggregat
 	}, nil
 }
 
-func (u *UserElastic) Search(ctx context.Context, criteria domain.Criteria) ([]*aggregate.User, error) {
+func (u *UserElastic) Search(ctx context.Context, criteria domain.Criteria) ([]*aggregate.User, string, error) {
 	u.mu.RLock()
 	defer u.mu.RUnlock()
 
 	criteria.Fields = []string{"username^2", "*_name"} // set scoring per-field
 	criteria.Query = "*" + criteria.Query + "*"        // like statement
 
-	body := newElasticDSLFromCriteria(criteria)
+	dslQuery := newElasticDSLFromCriteria(criteria)
 	var buf bytes.Buffer
-	if err := json.NewEncoder(&buf).Encode(body); err != nil {
-		return nil, err
+	if err := json.NewEncoder(&buf).Encode(dslQuery); err != nil {
+		return nil, "", err
 	}
 
 	res, err := u.c.Search(
@@ -101,26 +102,31 @@ func (u *UserElastic) Search(ctx context.Context, criteria domain.Criteria) ([]*
 		u.c.Search.WithBody(&buf),
 	)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	} else if res.StatusCode == 404 {
 		res.Body.Close()
-		return nil, nil
+		return nil, "", nil
 	}
 	defer res.Body.Close()
 
 	var e elasticResponseSearch
 	if err = json.NewDecoder(res.Body).Decode(&e); err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	users := make([]*aggregate.User, 0)
 	for _, hit := range e.Hits.Hits {
 		user, err := u.UnmarshalElastic(hit.Source)
 		if err != nil {
-			return nil, err
+			return nil, "", err
 		}
 		users = append(users, user)
 	}
 
-	return users, nil
+	var nextPage string
+	nextPageNumber := dslQuery.From + dslQuery.Size
+	if len(e.Hits.Hits) > 0 && nextPageNumber < e.Hits.Total.Value {
+		nextPage = strconv.Itoa(nextPageNumber)
+	}
+	return users, nextPage, nil
 }

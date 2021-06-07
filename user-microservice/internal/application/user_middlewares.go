@@ -50,7 +50,7 @@ func (u *userRepositoryTransaction) Update(ctx context.Context, id, displayName 
 	return
 }
 
-func (u *userRepositoryTransaction) Search(ctx context.Context, critera domain.Criteria) ([]*aggregate.User, error) {
+func (u *userRepositoryTransaction) Search(ctx context.Context, critera domain.Criteria) ([]*aggregate.User, string, error) {
 	return u.next.Search(ctx, critera)
 }
 

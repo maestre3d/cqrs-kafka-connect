@@ -99,6 +99,6 @@ func (u *UserPostgres) Find(ctx context.Context, userID string) (*aggregate.User
 	return user, nil
 }
 
-func (u *UserPostgres) Search(ctx context.Context, criteria domain.Criteria) ([]*aggregate.User, error) {
-	return nil, nil // this will be implemented using full-text search through ElasticSearch
+func (u *UserPostgres) Search(ctx context.Context, criteria domain.Criteria) ([]*aggregate.User, string, error) {
+	return nil, "", nil // this will be implemented using full-text search through ElasticSearch
 }
