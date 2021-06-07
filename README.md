@@ -8,7 +8,7 @@ Microservice environment used to demonstrate CQRS pattern (PostgreSQL + Elastics
     - [Start infrastructure](#start-infrastructure)
     - [Create Apache Kafka PostgreSQL Source connector](#create-apache-kafka-postgresql-source-connector)
     - [Create Apache Kafka Elasticsearch Sink connector](#create-apache-kafka-elasticsearch-sink-connector)
-    - [Start User Microservicer HTTP REST API](#start-user-microservicer-http-rest-api)
+    - [Start User Microservice HTTP REST API](#start-user-microservice-http-rest-api)
     - [[OPTIONAL] Lookup proyected documents on Elasticsearch](#optional-lookup-proyected-documents-on-elasticsearch)
     - [[OPTIONAL] Listen to CDC stream](#optional-listen-to-cdc-stream)
 
@@ -19,9 +19,10 @@ Microservice environment used to demonstrate CQRS pattern (PostgreSQL + Elastics
 
 ## TODO
 
-- PostgreSQL WAL replication user permissions (increase security).
-- Imporve elasticsearch security.
-- Set an Apache Kafka broker cluster (nodes >= 3).
+- PostgreSQL WAL replication user permissions.
+- Improve over security with SSL certs (enable TLS communication).
+- Set an Elasticsearch cluster with basic auth.
+- Set an Apache Kafka broker cluster (nodes >= 3) with basic auth.
 
 ## Get started
 
@@ -103,7 +104,7 @@ Body: _application/json_
 }
 ```
 
-### Start User Microservicer HTTP REST API
+### Start User Microservice HTTP REST API
 
 Run the `User` microservice example.
 
