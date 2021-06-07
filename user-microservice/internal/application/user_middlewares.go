@@ -16,6 +16,12 @@ func NewUser(r repository.User) User {
 	}
 }
 
+func NewUserReadOnly(r repository.User) UserReadOnly {
+	return &user{
+		repo: r,
+	}
+}
+
 type userRepositoryTransaction struct {
 	repository repository.User
 	next       User

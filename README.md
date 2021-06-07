@@ -8,7 +8,7 @@ Microservice environment used to demonstrate CQRS pattern (PostgreSQL + Elastics
     - [Start infrastructure](#start-infrastructure)
     - [Create Apache Kafka PostgreSQL Source connector](#create-apache-kafka-postgresql-source-connector)
     - [Create Apache Kafka Elasticsearch Sink connector](#create-apache-kafka-elasticsearch-sink-connector)
-    - [Ingest data to PostgreSQL](#ingest-data-to-postgresql)
+    - [Start User Microservicer HTTP REST API](#start-user-microservicer-http-rest-api)
     - [[OPTIONAL] Lookup proyected documents on Elasticsearch](#optional-lookup-proyected-documents-on-elasticsearch)
     - [[OPTIONAL] Listen to CDC stream](#optional-listen-to-cdc-stream)
 
@@ -103,13 +103,13 @@ Body: _application/json_
 }
 ```
 
-### Ingest data to PostgreSQL
+### Start User Microservicer HTTP REST API
 
 Run the `User` microservice example.
 
-`go run ./user-microservice/cmd/cli-api/main.go`
+`go run ./user-microservice/cmd/api-http/main.go`
 
-*Note: PostgreSQL JDBC connector is using a timestamp strategy to ingest data, avoiding batch polling and publishing. Thus, every time an item from users is updated, in order to propagate proyections to Elasticsearch, you **MUST** set `update_time` value to CURRENT_TIMESTAMP.*
+*Note: If you prefer using the PostgreSQL JDBC Kafka connector, it is worth to mention it is using a timestamp strategy to ingest data, avoiding batch polling and publishing. Thus, every time an item from users is updated, in order to propagate proyections to Elasticsearch, you **MUST** set `update_time` value to CURRENT_TIMESTAMP.*
 
 ### [OPTIONAL] Lookup proyected documents on Elasticsearch
 

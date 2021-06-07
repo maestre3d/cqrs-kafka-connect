@@ -9,8 +9,16 @@ import (
 )
 
 type User interface {
+	UserReadOnly
+	UserWriteOnly
+}
+
+type UserWriteOnly interface {
 	Create(ctx context.Context, id, username, displayName string) error
 	Update(ctx context.Context, id, displayName string) error
+}
+
+type UserReadOnly interface {
 	Search(ctx context.Context, query string) ([]*aggregate.User, error)
 	GetById(ctx context.Context, userID string) (*aggregate.User, error)
 }

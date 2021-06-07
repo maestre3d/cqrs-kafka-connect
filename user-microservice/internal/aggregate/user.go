@@ -1,9 +1,9 @@
 package aggregate
 
 type User struct {
-	ID          string
-	Username    string
-	DisplayName string
+	ID          string `json:"user_id"`
+	Username    string `json:"username"`
+	DisplayName string `json:"display_name"`
 }
 
 func NewUser(id, username, displayName string) *User {
