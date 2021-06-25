@@ -22,7 +22,7 @@ Microservice environment used to demonstrate CQRS pattern (PostgreSQL + Elastics
 - PostgreSQL WAL replication user permissions.
 - Improve over security with SSL certs (enable TLS communication).
 - Set an Elasticsearch cluster with basic auth.
-- Set an Apache Kafka broker cluster (nodes >= 3) with basic auth.
+- Set an Apache Kafka broker cluster (nodes >= 3) with basic auth (SASL_PLAIN or SASL_SSL).
 
 ## Get started
 
